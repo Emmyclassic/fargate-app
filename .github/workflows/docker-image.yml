@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies"
+      - npm install
+  pre_build:
+    commands:
+      - echo "Logging into Amazon ECR"
+      - aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 913524941030.dkr.ecr.eu-west-2.amazonaws.com
+  build:
+    commands:
+      - echo "Building Docker image"
+      - docker build -t fargate-app .
+      - docker tag fargate-app:latest 913524941030.dkr.ecr.eu-west-2.amazonaws.com/fargate-app:latest
+  post_build:
+    commands:
+      - echo "Pushing Docker image to ECR"
+      - docker push 913524941030.dkr.ecr.eu-west-2.amazonaws.com/fargate-app:latest
+artifacts:
+  files:
+    - "**/*"
